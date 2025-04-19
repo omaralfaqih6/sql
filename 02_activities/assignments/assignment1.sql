@@ -32,11 +32,15 @@ filtered by vendor IDs between 8 and 10 (inclusive) using either:
 	2.  one condition using BETWEEN
 */
 -- option 1
-
+SELECT *
+FROM customer_purchases
+WHERE vendor_id >= 8
+AND vendor_id <= 10
 
 -- option 2
-
-
+SELECT *
+FROM customer_purchases
+WHERE vendor_id between 8 AND 10;
 
 --CASE
 /* 1. Products can be sold by the individual unit or by bulk measures like lbs. or oz. 
