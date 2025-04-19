@@ -4,18 +4,23 @@
 
 --SELECT
 /* 1. Write a query that returns everything in the customer table. */
-
-
+select * 
+FROM customer
 
 /* 2. Write a query that displays all of the columns and 10 rows from the cus- tomer table, 
 sorted by customer_last_name, then customer_first_ name. */
-
-
+select *
+FROM customer
+order by customer_last_name, customer_first_name
+limit 10
 
 --WHERE
 /* 1. Write a query that returns all customer purchases of product IDs 4 and 9. */
 -- option 1
-
+SELECT *
+FROM customer_purchases cp
+WHERE product_id = '4' 
+OR product_id = '9'
 
 -- option 2
 
