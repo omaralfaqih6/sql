@@ -91,7 +91,14 @@ ORDER by vendor_name,market_date
 /* 1. Write a query that determines how many times each vendor has rented a booth 
 at the farmer’s market by counting the vendor booth assignments per vendor_id. */
 
+SELECT 
+vendor_name, -- coming from vendor
+count(vendor_booth_assignments.booth_number) as Count_Booth_per_vendor
 
+FROM vendor_booth_assignments
+INNER JOIN vendor
+	ON vendor_booth_assignments.vendor_id = vendor.vendor_id
+GROUP by vendor_name
 
 /* 2. The Farmer’s Market Customer Appreciation Committee wants to give a bumper 
 sticker to everyone who has ever spent more than $2000 at the market. Write a query that generates a list 
