@@ -18,7 +18,7 @@ limit 10
 /* 1. Write a query that returns all customer purchases of product IDs 4 and 9. */
 -- option 1
 SELECT *
-FROM customer_purchases cp
+FROM customer_purchases
 WHERE product_id = '4' 
 OR product_id = '9'
 
