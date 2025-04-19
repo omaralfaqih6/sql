@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="farmersmarket.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="7306"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="booth" custom_title="0" dock_id="1" table="4,5:mainbooth"/><dock_state state="000000ff00000000fd0000000100000002000004640000038dfc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000000004640000015c00ffffff000004640000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="booth" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="104"/><column index="2" value="125"/><column index="3" value="300"/><column index="4" value="83"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">-- SELECT
+
+-- selecting everything from customer
+SELECT *
+FROM customer;
+
+-- add a static VALUE
+SELECT 2025 as this_year, 'April' as this_month, customer_id
+FROM customer
+LIMIT 10;
+
+-- add an order by + LIMIT
+SELECT *
+FROM customer
+ORDER BY customer_last_name
+LIMIT 10;
+
+</sql><sql name="SQL 2">-- WHERE
+SELECT * FROM customer
+WHERE customer_id = 1
+OR customer_id = 2; -- 1 or 2
+-- AND customer_id = 2 -- returns NOTHING
+
+-- IN
+SELECT * FROM customer_purchases
+WHERE customer_id IN (3,4,5) -- only customer 3,4,5
+AND vendor_id IN (3,4,5); -- only vendor 3,4,5
+
+-- like
+-- all of the peppers
+SELECT * FROM product
+WHERE product_name LIKE '%pepper%';
+
+-- customers with a last name starting with a 
+SELECT * FROM customer
+WHERE customer_last_name LIKE 'a%';
+
+SELECT * FROM product
+WHERE product_size IS NULL
+OR product_size = '' -- two single quotes, &quot;blank&quot; -- different than null 
+</sql><sql name="SQL 3">-- CASE
+
+SELECT *
+, CASE WHEN vendor_type = 'Fresh Focused'
+	THEN 'Wednesday'
+WHEN vendor_type = 'Prepared Foods'
+	THEN 'Thursday'
+ELSE 'Saturday'
+END AS day_of_specialty
+--pie day, otherwise nothing 
+,CASE WHEN vendor_name LIKE	'%pie%'
+	THEN 'Wednesday'
+END as only_pie_day
+,CASE WHEN vendor_name = &quot;Annies Pies&quot;
+	THEN 'annie is best'
+END AS feedback
+
+FROM vendor</sql><sql name="SQL 4">--DISTINCT
+--without DISTINCT, 4221 rows, of various customer_ids
+SELECT customer_id FROM customer_purchases;
+
+-- with DISTINCT, one row per customer, 26 rows total 
+SELECT DISTINCT customer_id FROM customer_purchases;
+
+--without DISTINCT, only wed/sat 150 times over
+SELECT market_day
+FROM market_date_info;
+
+--market is open sat/wed!
+SELECT DISTINCT market_day
+FROM market_date_info;
+
+/*which vendor has sold products to a customer*/
+SELECT DISTINCT vendor_id
+FROM customer_purchases; --3 rows, vendor_id 7,8,4
+
+/*which vendor has sold products to a customer AND which product was it... */
+Select DISTINCT vendor_id, product_id
+FROM customer_purchases; --8 rows 
+
+/* which vendor has sold products to a customer AND which product was it AND to whom was it sold ? */
+SELECT DISTINCT vendor_id,product_id, customer_id
+FROM customer_purchases --200 rows 
+ORDER BY product_id ASC, customer_id DESC;
+</sql><sql name="SQL 5*">
+
+-- INNER JOIN
+-- no alias INNER JOIN
+
+/* get product names alongside customer_purchases...only products that a customer has purchased will be present */
+SELECT 
+product_name, -- coming from product
+vendor_id, -- coming from cp...below
+market_date,
+customer_id,
+customer_purchases.product_id
+
+FROM customer_purchases
+INNER JOIN product
+	ON customer_purchases.product_id = product.product_id;
+	
+/* which vendor has sold products to a customer AND which product was it AND to whom was it sold ? */
+SELECT DISTINCT vendor_id, 
+product_id, 
+--customer_id -- this is dissatisfying...let's have a name!
+customer_first_name,
+customer_last_name
+
+FROM customer_purchases as cp
+INNER JOIN customer as c
+	ON cp.customer_id = c.customer_id
+
+	
+/* which vendor has sold products to a customer AND which product was it AND to whom was it sold ? */
+SELECT DISTINCT 
+--vendor_id, 
+vendor_name,
+--product_id, 
+product_name,
+--customer_id -- this is dissatisfying...let's have a name!
+customer_first_name,
+customer_last_name
+
+FROM customer_purchases as cp
+INNER JOIN customer as c
+	ON cp.customer_id = c.customer_id
+INNER JOIN vendor as v
+	ON cp.vendor_id = v.vendor_id
+INNER JOIN product as p
+	ON cp.product_id = p.product_id;
+
+SELECT DISTINCT 
+market_date,
+--vendor_id, 
+vendor_name,
+--product_id, 
+product_name,
+--customer_id -- this is dissatisfying...let's have a name!
+customer_first_name,
+customer_last_name
+
+FROM customer_purchases as cp
+INNER JOIN customer as c
+	ON cp.customer_id = c.customer_id
+INNER JOIN vendor as v
+	ON cp.vendor_id = v.vendor_id
+INNER JOIN product as p
+	ON cp.product_id = p.product_id
+	
+ORDER BY customer_first_name, customer_last_name, product_name, market_date</sql><current_tab id="4"/></tab_sql></sqlb_project>
