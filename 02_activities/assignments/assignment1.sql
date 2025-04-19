@@ -93,7 +93,8 @@ at the farmer’s market by counting the vendor booth assignments per vendor_id.
 
 SELECT 
 vendor_name, -- coming from vendor
-count(vendor_booth_assignments.booth_number) as Count_Booth_per_vendor
+vendor_booth_assignments.vendor_id,
+count(vendor_booth_assignments.vendor_id) as Count_Booth_per_vendor_id
 
 FROM vendor_booth_assignments
 INNER JOIN vendor
