@@ -75,7 +75,15 @@ FROM product;
 /* 1. Write a query that INNER JOINs the vendor table to the vendor_booth_assignments table on the 
 vendor_id field they both have in common, and sorts the result by vendor_name, then market_date. */
 
+SELECT 
+vendor_name, -- coming from vendor
+vendor_booth_assignments.vendor_id,
+market_date
 
+FROM vendor_booth_assignments
+INNER JOIN vendor
+	ON vendor_booth_assignments.vendor_id = vendor.vendor_id
+ORDER by vendor_name,market_date
 
 /* SECTION 3 */
 
