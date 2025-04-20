@@ -132,7 +132,17 @@ When inserting the new vendor, you need to appropriately align the columns to be
 VALUES(col1,col2,col3,col4,col5) 
 */
 
+--Delete an already existing temporary file if it exists
+DROP TABLE IF EXISTS temp.new_vendor;
 
+--Create temporary table based on vendor table
+CREATE TABLE temp.new_vendor AS
+select *
+FROM vendor;
+
+--Insert the new 10th vendor
+INSERT INTO temp.new_vendor (vendor_id,vendor_name,vendor_type,vendor_owner_first_name,vendor_owner_last_name)
+VALUES ('10','Thomass Superfood Store','Fresh Focused','Thomas','Rosenthal');
 
 -- Date
 /*1. Get the customer_id, month, and year (in separate columns) of every purchase in the customer_purchases table.
