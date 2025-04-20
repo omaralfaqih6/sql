@@ -107,6 +107,17 @@ of customers for them to give stickers to, sorted by last name, then first name.
 
 HINT: This query requires you to join two tables, use an aggregate function, and use the HAVING keyword. */
 
+SELECT
+customer_first_name,
+customer_last_name,
+round(sum(cost_to_customer_per_qty*quantity)) as total_charges_per_customer
+
+FROM customer_purchases
+INNER JOIN customer
+	ON customer_purchases.customer_id = customer.customer_id
+GROUP by customer_purchases.customer_id
+HAVING total_charges_per_customer > 2000
+ORDER by customer_last_name, customer_first_name
 
 
 --Temp Table
