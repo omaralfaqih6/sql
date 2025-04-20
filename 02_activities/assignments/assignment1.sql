@@ -163,3 +163,12 @@ Remember that money spent is quantity*cost_to_customer_per_qty.
 HINTS: you will need to AGGREGATE, GROUP BY, and filter...
 but remember, STRFTIME returns a STRING for your WHERE statement!! */
 
+SELECT
+customer_id,
+strftime('%Y',market_date) as purchase_year,
+strftime('%m',market_date) as purchase_month,
+round(sum(quantity*cost_to_customer_per_qty),2) as money_spent
+from customer_purchases 
+WHERE purchase_year = '2022' 
+AND purchase_month = '04'
+GROUP by customer_id
