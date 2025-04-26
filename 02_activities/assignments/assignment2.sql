@@ -73,6 +73,12 @@ WHERE ranked_visits=1
 /* 3. Using a COUNT() window function, include a value along with each row of the 
 customer_purchases table that indicates how many different times that customer has purchased that product_id. */
 
+SELECT DISTINCT
+customer_id,
+product_id
+,count () OVER(partition by customer_id order by product_id ASC) as times_customer_purchased_prod
+
+from customer_purchases
 
 
 -- String manipulations
