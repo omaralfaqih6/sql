@@ -104,7 +104,16 @@ from product
 
 /* 2. Filter the query to show any product_size value that contain a number with REGEXP. */
 
+select 
+product_name,
+product_size,
+CASE
+	WHEN product_name like '%- jar%' THEN SUBSTR(product_name,INSTR(product_name,'- ')+2,3) 
+	WHEN product_name like '%- org%' THEN SUBSTR(product_name,INSTR(product_name,'- ')+2,7) 
+end as description
 
+from product
+where product_size REGEXP '\d'
 
 -- UNION
 /* 1. Using a UNION, write a query that displays the market dates with the highest and lowest total sales.
