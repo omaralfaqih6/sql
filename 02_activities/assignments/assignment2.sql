@@ -49,6 +49,14 @@ from customer_purchases
 then write another query that uses this one as a subquery (or temp table) and filters the results to 
 only the customer’s most recent visit. */
 
+--customer's most recent visit is labeled 1
+
+SELECT
+customer_id,
+market_date
+,row_number () OVER(partition by customer_id order by market_date DESC) as customer_visits_rows --displays all rows in the customer_purchases table, with the counter changing on each new market date for each customer.
+from customer_purchases
+
 
 
 /* 3. Using a COUNT() window function, include a value along with each row of the 
