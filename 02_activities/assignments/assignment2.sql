@@ -57,7 +57,18 @@ market_date
 ,row_number () OVER(partition by customer_id order by market_date DESC) as customer_visits_rows --displays all rows in the customer_purchases table, with the counter changing on each new market date for each customer.
 from customer_purchases
 
-
+--customer's most recent visit only
+SELECT
+customer_id,
+market_date
+from(
+	SELECT
+		customer_id,
+		market_date
+		,row_number () OVER(partition by customer_id order by market_date DESC) as ranked_visits --displays all rows in the customer_purchases table, with the counter changing on each new market date for each customer.
+	from customer_purchases
+) as recent_visits
+WHERE ranked_visits=1
 
 /* 3. Using a COUNT() window function, include a value along with each row of the 
 customer_purchases table that indicates how many different times that customer has purchased that product_id. */
