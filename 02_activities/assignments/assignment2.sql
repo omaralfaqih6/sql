@@ -20,7 +20,14 @@ The `||` values concatenate the columns into strings.
 Edit the appropriate columns -- you're making two edits -- and the NULL rows will be fixed. 
 All the other rows will remain the same.) */
 
+select
+product_name
+,product_size
+,product_qty_type
+,product_name || ',' || product_size || '(' || product_qty_type || ')' as manager_list --before the null fix
+,product_name || ',' || coalesce(product_size,'') || '(' || coalesce(product_qty_type,'unit') || ')' as manager_list_fixed --after the null fix
 
+from product
 
 --Windowed Functions
 /* 1. Write a query that selects from the customer_purchases table and numbers each customer’s  
