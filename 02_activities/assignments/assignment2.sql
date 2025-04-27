@@ -170,6 +170,19 @@ Think a bit about the row counts: how many distinct vendors, product names are t
 How many customers are there (y). 
 Before your final group by you should have the product of those two queries (x*y).  */
 --OPTION 1
+DROP TABLE if EXISTS temp.five_prod_price;
+
+CREATE TABLE temp.five_prod_price as
+
+select DISTINCT
+p.product_id,
+product_name,
+vi.original_price
+
+from product p
+INNER JOIN vendor_inventory vi ON p.product_id=vi.product_id
+WHERE p.RowID IN (SELECT RowID FROM product T2 WHERE p.product_id = vi.product_id LIMIT 5);
+
 DROP TABLE if EXISTS temp.five_prod_vendor_combined;
 CREATE TABLE temp.five_prod_vendor_combined as
 select
