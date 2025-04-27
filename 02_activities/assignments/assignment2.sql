@@ -242,6 +242,7 @@ values ('999','Black Forest Cake','large','3','unit',CURRENT_TIMESTAMP);
 
 HINT: If you don't specify a WHERE clause, you are going to have a bad time.*/
 
+DELETE FROM product_units WHERE snapshot_timestamp < CURRENT_TIMESTAMP AND product_id=999;
 
 
 -- UPDATE
