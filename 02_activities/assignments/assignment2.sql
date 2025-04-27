@@ -125,8 +125,37 @@ HINT: There are a possibly a few ways to do this query, but if you're struggling
 3) Query the second temp table twice, once for the best day, once for the worst day, 
 with a UNION binding them. */
 
-
-
+--create first CTE for daily sales query 
+WITH daily_sales as (
+		SELECT
+		market_date,
+		sum(quantity * cost_to_customer_per_qty) as sales
+		
+		from customer_purchases
+	Group by market_date
+),
+--create second CTE for ranking daily sales 
+ranked_daily_sales as (
+SELECT
+market_date,
+sales,
+rank()OVER(order by sales DESC) as best_daily_sales,
+rank()OVER(order by sales ASC) as worst_daily_sales
+FROM daily_sales
+)
+--show the best daily sales 
+SELECT
+market_date,
+sales
+from ranked_daily_sales
+where best_daily_sales=1
+UNION -- unify best and worst daily sales
+--show the worst daily sales 
+SELECT
+market_date,
+sales
+from ranked_daily_sales
+where worst_daily_sales=1
 
 /* SECTION 3 */
 
