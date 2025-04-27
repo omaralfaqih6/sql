@@ -169,8 +169,25 @@ Remember, CROSS JOIN will explode your table rows, so CROSS JOIN should likely b
 Think a bit about the row counts: how many distinct vendors, product names are there (x)?
 How many customers are there (y). 
 Before your final group by you should have the product of those two queries (x*y).  */
+--OPTION 1
+DROP TABLE if EXISTS temp.five_prod_vendor_combined;
+CREATE TABLE temp.five_prod_vendor_combined as
+select
+--vendor_id,
+vendor_name,
+--product_id,
+product_name,
+original_price
+from vendor
+cross join five_prod_price;
 
+select
+vendor_name, --There are 9 vendor
+product_name, --There are 5 products chosen
+original_price,
+(original_price*26) as sales --There are 26 customers in the customer table. The total number of rows = 9 * 5 = 45 rows.
 
+from five_prod_vendor_combined
 
 -- INSERT
 /*1.  Create a new table "product_units". 
