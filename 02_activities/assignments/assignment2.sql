@@ -169,38 +169,47 @@ Remember, CROSS JOIN will explode your table rows, so CROSS JOIN should likely b
 Think a bit about the row counts: how many distinct vendors, product names are there (x)?
 How many customers are there (y). 
 Before your final group by you should have the product of those two queries (x*y).  */
---OPTION 1
-DROP TABLE if EXISTS temp.five_prod_price;
 
-CREATE TABLE temp.five_prod_price as
+DROP TABLE if EXISTS temp.vendor_prod_price;
 
+CREATE TABLE temp.vendor_prod_price as --create a temporary table listing each vendor with itsproduct while displaying vendor names and product names rather than IDs. 
 select DISTINCT
-p.product_id,
-product_name,
-vi.original_price
-
-from product p
-INNER JOIN vendor_inventory vi ON p.product_id=vi.product_id
-WHERE p.RowID IN (SELECT RowID FROM product T2 WHERE p.product_id = vi.product_id LIMIT 5);
-
-DROP TABLE if EXISTS temp.five_prod_vendor_combined;
-CREATE TABLE temp.five_prod_vendor_combined as
-select
 --vendor_id,
 vendor_name,
 --product_id,
 product_name,
-original_price
-from vendor
-cross join five_prod_price;
+original_price as price
+,(5) as quantity_sold
+from vendor_inventory vi
+INNER JOIN product p ON p.product_id=vi.product_id
+INNER JOIN vendor v ON v.vendor_id=vi.vendor_id;
 
-select
-vendor_name, --There are 9 vendor
-product_name, --There are 5 products chosen
-original_price,
-(original_price*26) as sales --There are 26 customers in the customer table. The total number of rows = 9 * 5 = 45 rows.
+DROP TABLE if EXISTS temp.prod_sales_per_customer; --create a temporary table listing each vendor's products sold to every customer. customers' names are for better view.
+--There are 26 customers. 1 vendor is selling 4 products, 1 vendor is selling 3 products and 1 vendor is selling 1 product. This means that 26 rows * 8 product rows will result in the prod_price_per_customer table.
+-- so a total 208 rows is generated in this temporary table.
+CREATE TABLE temp.prod_sales_per_customer as
+SELECT
+vendor_name
+,product_name
+,(customer_first_name || ' ' || customer_last_name) as customer_name
+,price
+,quantity_sold
+,(price*quantity_sold) as total_price
 
-from five_prod_vendor_combined
+from vendor_prod_price
+cross join customer
+--group by product_name
+order by vendor_name,product_name;
+--this query is showing the final required table; vendor's sales per product if 5 of each were sold to every customer.
+SELECT
+vendor_name
+,product_name
+,sum(price*quantity_sold) as total_product_sales
+
+from prod_sales_per_customer
+group by product_name
+order by vendor_name,product_name
+
 
 -- INSERT
 /*1.  Create a new table "product_units". 
