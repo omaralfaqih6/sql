@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="farmersmarket.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="7306"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/><expanded_item id="4" parent="1"/></tab_structure><tab_browse><table title="booth" custom_title="0" dock_id="5" table="4,5:mainbooth"/><dock_state state="000000ff00000000fd0000000100000002000005260000039bfc0100000003fb000000160064006f0063006b00420072006f00770073006500310100000000000005260000000000000000fb000000160064006f0063006b00420072006f00770073006500340100000000ffffffff0000000000000000fb000000160064006f0063006b00420072006f00770073006500350100000000000005260000015c00ffffff000005260000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="booth" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="104"/><column index="2" value="125"/><column index="3" value="300"/><column index="4" value="83"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="customer_purchases" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="80"/><column index="2" value="73"/><column index="3" value="91"/><column index="4" value="91"/><column index="5" value="62"/><column index="6" value="184"/><column index="7" value="119"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 11">--select DISTINCT
+--date ('now') as now
+--STRFTIME ('%Y-%m-%d','NOW');
+
+SELECT DISTINCT
+date('now') as [now]
+,datetime() as [rightnow]
+,strftime('%Y/%m','now') as OMAR
+,strftime('%Y-%m-%d','2025-04-01','+50 days') as the_future
+,market_date
+,DATE(market_date,'start of month','-1 day') as end_of_prev_month
+
+,market_date
+,julianday('now')-julianday(market_date) as now_market_date_days --number of days between now and market date
+,(julianday('now')-julianday(market_date))/365.25 as now_market_date_years
+,(julianday('now')-julianday(market_date)) *24 as now_market_date_hrs
+
+
+FROM market_date_info</sql><sql name="SQL 12">SELECT *
+,IFNULL(Product_size,'Unknown')
+
+,IFNULL(Product_size,product_qty_type)
+,coalesce(product_size,product_qty_type,'missing')
+,IFNULL(IFNULL(product_size,product_qty_type),'missing')
+
+FROM product;
+
+SELECT *
+,coalesce(product_size,'Unknown') as Convert_Null_To_unknown_but_leave_Blank_alone--we aren't handling the blank
+--nullif 
+,nullif(product_size,'') as Convert_Blank_to_NULL--finding values in prodcut size that are blank and setting it to equal NULL
+
+,coalesce(nullif(product_size,''),'unknown') as convert_blank_and_null_to_unknown
+
+From product
+WHERE NULLIF(product_size,'') IS NULL</sql><sql name="SQL 13">-- row_number
+-- what product is the highest price per vendor
+
+--outer query
+SELECT x.*, product_name
+FROM
+--inner QUERY
+(
+	SELECT vendor_id
+	,market_date
+	,product_id
+	,original_price
+	,ROW_NUMBER() OVER(PARTITION BY vendor_id ORDER BY original_price DESC) as price_rank
+		/* ROW_NUMBER() OVER(PARTITION BY vendor_id, product_id ORDER BY original_price DESC) as price_rank
+		if we add product_id, we could potentially track the time the original_price was HIGHEST PER PRODUCT too
+		*/
+	FROM vendor_inventory
+) x 
+INNER JOIN product p
+	ON x.product_id = p.product_id
+
+WHERE x.price_rank = 1;</sql><sql name="SQL 14">-- highest single purchase in a day per customer
+
+SELECT * 
+FROM (
+	SELECT 
+	customer_id
+	,product_id
+	,market_date
+	,quantity
+	,quantity*cost_to_customer_per_qty as cost
+	,ROW_NUMBER() OVER(PARTITION BY customer_id ORDER BY quantity*cost_to_customer_per_qty DESC) as sales_rank
+
+	FROM customer_purchases
+) x
+WHERE x.sales_rank = 1
+
+ORDER BY cost DESC</sql><sql name="SQL 15">--ntile 4,5,100
+
+--make quartiles, make quintiles, make percentiles
+
+-- daily sales by ntiles
+
+SELECT *
+,NTILE(4) OVER (PARTITION BY vendor_name ORDER BY sales ASC) as quartile
+,NTILE(5) OVER (PARTITION BY vendor_name ORDER BY sales ASC) as quintile
+,NTILE(100) OVER (PARTITION BY vendor_name ORDER BY sales ASC) as percentile
+
+
+FROM (
+	SELECT md.market_date
+	,market_day
+	,market_week
+	,market_year
+	,vendor_name
+	,sum(quantity*cost_to_customer_per_qty) as sales
+
+
+	FROM market_date_info md
+	JOIN customer_purchases cp
+		ON md.market_date = cp.market_date
+	JOIN vendor v
+		ON cp.vendor_id = v.vendor_id
+		
+	GROUP BY md.market_date, v.vendor_id
+ ) 
+  </sql><sql name="SQL 6">DROP TABLE IF EXISTS temp.row_rank_dense;
+
+CREATE TEMP TABLE IF NOT EXISTS temp.row_rank_dense
+(
+emp_id INT,
+salary INT
+);
+
+INSERT INTO temp.row_rank_dense
+VALUES(1,200000),
+        (2,200000),
+        (3, 160000),
+		(4, 120000),
+		(5, 125000),
+		(6, 165000),
+		(7, 230000),
+		(8, 100000),
+		(9, 165000),
+		(10, 100000);
+
+SELECT * 
+,row_number() OVER(ORDER BY salary DESC) as [row_number]
+,rank() OVER(ORDER BY salary DESC) as [rank]
+,dense_rank() OVER(ORDER BY salary DESC) as [dense_rank]
+
+FROM row_rank_dense
+
+
+) x</sql><sql name="SQL 7">--UNION/UNION ALL
+
+--most and least expensive product per vendor with a UNION
+
+SELECT vendor_id, product_id, original_price, rn_max as [row_number]
+FROM 
+(
+	SELECT DISTINCT
+	vendor_id
+	,product_id
+	,original_price
+	,ROW_NUMBER() OVER(PARTITION BY vendor_id ORDER BY original_price DESC) as rn_max
+
+	FROM vendor_inventory
+) 
+where rn_max = 1
+
+UNION  -- union returned 5 rows...UNION all returned 6 rows (vendor #4 duplicated)
+
+SELECT *
+FROM 
+(
+	SELECT DISTINCT
+	vendor_id
+	,product_id
+	,original_price
+	,ROW_NUMBER() OVER(PARTITION BY vendor_id ORDER BY original_price ASC) as rn_min
+
+	FROM vendor_inventory
+) 
+where rn_min = 1
+
+</sql><sql name="SQL 9*">-- INTERSECT / EXCEPT
+
+--products that have been sold (e.g. are in the customer_purchases AND product)
+-- direction does not matter
+
+SELECT product_id
+FROM customer_purchases
+INTERSECT
+SELECT product_id
+FROM product;
+
+--products that have NOT been sold (e.g. are NOT in customer_purchases even though they are in product)
+SELECT x.product_id, product_name
+FROM (
+	SELECT product_id
+	FROM product
+	EXCEPT 
+	SELECT product_id 
+	FROM customer_purchases
+) x
+JOIN product p on x.product_id = p.product_id
+
+--NOTHING!
+-- direction matters....
+SELECT product_id
+FROM customer_purchases
+EXCEPT 
+SELECT product_id 
+FROM product;</sql><current_tab id="7"/></tab_sql></sqlb_project>
