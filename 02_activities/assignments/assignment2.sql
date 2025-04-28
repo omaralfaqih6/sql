@@ -288,6 +288,47 @@ Finally, make sure you have a WHERE statement to update the right row,
 	you'll need to use product_units.product_id to refer to the correct row within the product_units table. 
 When you have all of these components, you can run the update statement. */
 
+create table if not EXISTS product_units as
+
+SELECT *
+,CURRENT_TIMESTAMP as snapshot_timestamp
+from product
+where product_qty_type='unit'
+order by product_id ASC; 
+
+DROP TABLE if EXISTS temp.ranked_quantity;
+
+CREATE TABLE temp.ranked_quantity as -- rank function is used to determine the latest quantity.
+	select
+	product_id
+	,market_date
+	,quantity
+	,rank() OVER(PARTITION by product_id order by market_date DESC) as latest_quantity_per_product
+	from vendor_inventory
+	order by product_id ASC, market_date DESC;
+
+DROP TABLE if EXISTS temp.latest_quantity;
+
+CREATE TABLE temp.latest_quantity as
+
+	SELECT *
+	FROM ranked_quantity
+	where latest_quantity_per_product = 1;
+
+select product_id,quantity
+from latest_quantity;
+
+update product_units
+SET current_quantity = 0
+where current_quantity is NULL;
+
+update product_units
+SET current_quantity = latest_quantity.quantity
+from latest_quantity
+where product_units.product_id=latest_quantity.product_id;
+
+select *
+from product_units;
 
 
 
