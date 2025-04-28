@@ -217,15 +217,11 @@ This table will contain only products where the `product_qty_type = 'unit'`.
 It should use all of the columns from the product table, as well as a new column for the `CURRENT_TIMESTAMP`.  
 Name the timestamp column `snapshot_timestamp`. */
 
-DROP TABLE if EXISTS temp.product_units;
-
-CREATE TABLE temp.product_units as
-
+create table if not EXISTS product_units as
 SELECT *
 ,CURRENT_TIMESTAMP as snapshot_timestamp
-
 from product
-where product_qty_type='unit';
+where product_qty_type='unit'; 
 
 select *
 from product_units
@@ -237,13 +233,43 @@ This can be any product you desire (e.g. add another record for Apple Pie). */
 INSERT INTO product_units (product_id,product_name,product_size,product_category_id,product_qty_type,snapshot_timestamp)
 values ('999','Black Forest Cake','large','3','unit',CURRENT_TIMESTAMP);
 
+--Adding the 'INSERT' command into the first code for creating the "product_units" table:
+create table if not EXISTS product_units as
+
+SELECT *
+,CURRENT_TIMESTAMP as snapshot_timestamp
+from product
+where product_qty_type='unit'; 
+
+INSERT INTO product_units (product_id,product_name,product_size,product_category_id,product_qty_type,snapshot_timestamp)
+values ('999','Black Forest Cake','large','3','unit',CURRENT_TIMESTAMP);
+
+select *
+from product_units
+
+
 -- DELETE
 /* 1. Delete the older record for the whatever product you added. 
 
 HINT: If you don't specify a WHERE clause, you are going to have a bad time.*/
 
+DELETE FROM product_units WHERE snapshot_timestamp < CURRENT_TIMESTAMP AND product_id=999; --this is the code required for this section. 
+--I added it to the first code for creating the product_units table as shown below.
+
+--Adding the 'DELETE' command into the first code for creating the "product_units" table:create table if not EXISTS product_units as
+
+SELECT *
+,CURRENT_TIMESTAMP as snapshot_timestamp
+from product
+where product_qty_type='unit'; 
+
+INSERT INTO product_units (product_id,product_name,product_size,product_category_id,product_qty_type,snapshot_timestamp)
+values ('999','Black Forest Cake','large','3','unit',CURRENT_TIMESTAMP);
+
 DELETE FROM product_units WHERE snapshot_timestamp < CURRENT_TIMESTAMP AND product_id=999;
 
+select *
+from product_units
 
 -- UPDATE
 /* 1.We want to add the current_quantity to the product_units table. 
